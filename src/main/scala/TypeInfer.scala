@@ -66,7 +66,15 @@ object TypeInfer:
       case (_, TypeVar(_))           => unify(u, t, s)
       case (Arrow(st0, st1), Arrow(su0, su1)) =>
         unify(su0, st0, unify(su1, st1, s))
-      // case TypeCon(kts,tst),TypeCon(ktu,tus) =>
+      case (tc0 @ TypeCon(kts, tst), tc1 @ TypeCon(ktu, tus)) if kts == ktu =>
+        if tst.lengthCompare(tus) == 0 then
+          tst.zip(tus).foldLeft(s) { case (subst, (t0, t1)) =>
+            unify(t0, t1, subst)
+          }
+        else
+          throw new Exception(
+            s"cannot unify $tc0 with $tc1 :number of type arguments are differenct"
+          )
       case _ => throw new TypeError(s"cannot unify $t with $u")
 
   def infer(expr: Term, t: Type, s: Subst): Env ?=> Subst =
