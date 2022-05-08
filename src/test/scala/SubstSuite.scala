@@ -76,4 +76,23 @@ class SubstSuite extends munit.FunSuite:
       TypeCon("B", List(TypeVar("c"), TypeVar("d")))
     )
   }
-  test("call(env): substitute all types within env") {}
+  test("call(env): empty env with empty substitution") {
+    import TypeInfer.Env
+    val s = Subst.empty
+    val env0 = Env.empty
+    assertEquals(env0.ap(s), Env.empty)
+  }
+  test("call(env): env with some substitutions") {
+    import TypeInfer.Env
+    val s = Subst.empty.extend(TypeVar("a"), TypeVar("b"))
+    val env0 = Env(
+      (
+        "x",
+        TypeScheme(
+          Set(TypeVar("a"), TypeVar("b")),
+          Arrow(TypeVar("a"), TypeVar("c"))
+        )
+      )
+    )
+    assertEquals(env0.ap(s).lookup("x").get.toString, "∀ a, b. (b -> c)")
+  }

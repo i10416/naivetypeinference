@@ -17,7 +17,7 @@ object TypeInfer:
           acc union tpe.collect
         }
       def ap(subst: Subst): Env =
-        env.map((k, ts) => (k, TypeScheme(ts.collect, subst(ts.tpe))))
+        env.map((k, ts) => (k, TypeScheme(ts.ts, subst(ts.tpe))))
 
   object Predefined:
     val boolType = TypeCon("Bool", Nil)
