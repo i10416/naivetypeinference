@@ -16,6 +16,8 @@ object TypeInfer:
         env.foldLeft(Set.empty) { case (acc, (_, tpe)) =>
           acc union tpe.collect
         }
+      def ap(subst: Subst): Env =
+        env.map((k, ts) => (k, TypeScheme(ts.collect, subst(ts.tpe))))
 
   object Predefined:
     val boolType = TypeCon("Bool", Nil)
@@ -84,10 +86,24 @@ object TypeInfer:
         import Env.*
         summon[Env]
           .lookup(name)
-          .fold(throw new TypeError(s"undefined: $name"))(???)
-        ???
-      case Lambda(arg, ret)  => ???
-      case Apply(f, args)    => ???
-      case Let(id, lhs, rhs) => ???
+          .fold(throw new TypeError(s"undefined: $name"))(ts =>
+            unify(Type.from(ts), t, s)
+          )
+      case Lambda(id, ret) =>
+        val (a, b) = (newTypeVar(), newTypeVar())
+        val s0 = unify(t, Arrow(a, b), s)
+        val newEnv: Env = summon[Env] + ((id, TypeScheme(Set.empty, a)))
+        infer(ret, b, s0)(using newEnv)
+      case Apply(f, args) =>
+        val a = newTypeVar()
+        val s0 = infer(f, Arrow(a, t), s)
+        infer(args, a, s0)
+      case Let(id, decl, body) =>
+        val a = newTypeVar()
+        val s0 = infer(decl, a, s)
+        val newEnv: Env =
+          import Env.ap
+          summon[Env] + ((id, TypeScheme(s0(a))(using summon[Env].ap(s0))))
+        infer(body, t, s0)(using newEnv)
 
   case class TypeError(msg: String) extends Exception(msg)

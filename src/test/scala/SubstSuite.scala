@@ -76,3 +76,4 @@ class SubstSuite extends munit.FunSuite:
       TypeCon("B", List(TypeVar("c"), TypeVar("d")))
     )
   }
+  test("call(env): substitute all types within env") {}
