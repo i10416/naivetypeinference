@@ -1,8 +1,6 @@
 package naivetypeinference
 
 import scala.util.control.NonFatal
-// Point: HM型システムを使えば、型に関するヒントがなくても、ラムダ式だけから適切な型が推論できる
-// 木構造を潜って不明な型を仮置きし、登りながら不明な型を解決していく
 object TypeInfer:
   import Type.*
   opaque type Env = String Map TypeScheme

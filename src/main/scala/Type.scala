@@ -7,6 +7,9 @@ enum Type:
     case TypeCon(k, ts)  => s"$k[${ts.mkString(",")}]"
 
   /** 型変数をあらわす. たとえば Int, Bool, Char がこの 'インスタンス'
+    *
+    * a,b が TypeVar のとき unify(a,b) は a と b が一致するように a -> b または b -> a となるような
+    * Subst を返す
     */
   case TypeVar(name: String)
 
@@ -14,7 +17,9 @@ enum Type:
     */
   case Arrow(arg: Type, ret: Type)
 
-  /** 型コンストラクタをあらわす. e.g. Tpe[A,B,C,...]
+  /** 具体的な型コンストラクタをあらわす. e.g. Tpe[A,B,C,...]
+    * unify(T[],T[]),unify(T[a,b,c],T[d,e,f]) は成功する(多相の場合は型引数の数が同じ)が
+    * unify(T[],S[]) や unify(T[],S[a,...]) などは成立しない.
     */
   case TypeCon(k: String, ts: List[Type] = Nil)
 object Type:
