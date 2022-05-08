@@ -1,5 +1,34 @@
 # naive type inferernce
 
+次のような構文とプリミティブ型をもつ簡易的なプログラムについて型推論を実装する.
+
+```scala
+enum Term:
+  /** 変数(identifier)をあらわす.
+    */
+  case Id(name: String)
+
+  /** λ抽象をあらわす.
+    */
+  case Lambda(name: String, t: Term)
+
+  /** 関数適用をあらわす.
+    */
+  case Apply(fn: Term, arg: Term)
+
+  /** Let 式をあらわす.
+    */
+  case Let(x: String, defn: Term, body: Term)
+```
+
+```scala
+object Predefined:
+  // ...
+  val boolType = TypeCon("Bool", Nil)
+  val intType = TypeCon("Int", Nil)
+  // ...
+```
+
 ## 型推論の概要
 例えば、`a + b` という式が与えられたとき、`+`は `Int => Int => Int` であるから `a :Int`,`b: Int` が推論できる.
 
@@ -29,7 +58,7 @@ fun(a) {
 1. `fun(a)`の型はわからないが、 `fun(a)` の引数 `a` は `if` の引数になっているので `a: Bool` が推測できるから `Bool => _` と推測できる. 
 2. `if` 式の `then` 節で `0: Int` を返しているので `else` 節の `f` は `_ => Int` と推定できる. 
 3. また、 `f` は `1:Int` を受け取っているので `f: Int => _` と推定できる. 
-4.  2,3 から `f: Int => Int` と推定できる.
+4.  2,3 から `f: Int => Int` と推定できる. (このように仮置きした型を埋める処理が `unify`)
 5.  `fun(f)`は`(Int => Int) => Int` と推定できる.
 6.  `fun(a)` は `Bool => (Int => Int) => Int` と推定できる.
 
